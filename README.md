@@ -51,6 +51,33 @@ docker run -d --name poolui --restart unless-stopped --network whale2api \
   ghcr.io/tangsong404/whale2api:latest /usr/local/bin/poolui
 ```
 
+### Vercel Hobby
+
+Vercel uses the container deployment in `vercel.json`: one service runs the Go
+gateway and pool UI, and a private service runs the on-demand Chromium device
+harvester. This is separate from Docker Compose; pool state is stored in
+PostgreSQL rather than an ephemeral container file.
+
+In Vercel Project Settings, add these environment variables before deploying:
+
+| Variable | Purpose |
+| --- | --- |
+| `WHALE2API_DATABASE_URL` | PostgreSQL connection URL. The app creates its tables on first start. |
+| `POOL_UI_ADMIN_TOKEN` | Strong password for the pool UI, served at `/`. |
+| `DEVICE_HARVEST_TOKEN` | Shared secret between the gateway and private harvester service. |
+
+The service binding injects `DEVICE_HARVEST_URL`; it must not be set to a public
+URL. Do not put credentials in `vercel.json`, commit them, or use the SQLite
+file path on Vercel. The pool UI's bulk account-test job is process-local and
+may be interrupted if a Vercel instance scales down; use it for low-volume
+personal testing, not as a durable background queue.
+
+Vercel Services and container images are currently in beta. Hobby is limited
+to personal, non-commercial use and has finite compute/function quotas. Vercel
+also limits function request/response bodies to 4.5 MB, so very large prompts
+or base64 images may need smaller inputs. See [Vercel Services](https://vercel.com/docs/services),
+[Hobby limits](https://vercel.com/docs/plans/hobby), and [Function limits](https://vercel.com/docs/functions/limitations).
+
 ### 本地开发
 
 ```

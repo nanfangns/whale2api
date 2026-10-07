@@ -7,6 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/google/uuid v1.6.0
 	github.com/hupe1980/go-tiktoken v0.0.10
+	github.com/lib/pq v1.10.9
 	github.com/refraction-networking/utls v1.8.2
 	modernc.org/sqlite v1.36.2
 )

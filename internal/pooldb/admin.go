@@ -204,7 +204,7 @@ func scanPoolAccountRows(rows *sql.Rows) ([]PoolAccountRow, error) {
 	return out, rows.Err()
 }
 
-func (db *DB) nextBindingPosition(ctx context.Context, tx *sql.Tx, apiKey string) (int, error) {
+func (db *DB) nextBindingPosition(ctx context.Context, tx *sqlTx, apiKey string) (int, error) {
 	var pos int
 	err := tx.QueryRowContext(ctx, `
 SELECT COALESCE(MAX(position), -1) + 1 FROM pool_bindings WHERE api_key = ?

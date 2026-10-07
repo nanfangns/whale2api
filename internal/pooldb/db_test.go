@@ -3,6 +3,7 @@ package pooldb
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -38,5 +39,23 @@ func TestIsUniqueViolationSQLite(t *testing.T) {
 	err = db.CreateGatewayKey(ctx, "sk-dup", "b", "")
 	if !IsUniqueViolation(err) {
 		t.Fatalf("expected unique violation, got %v", err)
+	}
+}
+
+func TestConnectFromEnvRequiresPostgresURL(t *testing.T) {
+	t.Setenv("WHALE2API_DATABASE_URL", "")
+	t.Setenv("WHALE2API_REQUIRE_DATABASE_URL", "true")
+	if _, err := ConnectFromEnv(context.Background()); err == nil || !strings.Contains(err.Error(), "WHALE2API_DATABASE_URL is required") {
+		t.Fatalf("expected missing PostgreSQL URL error, got %v", err)
+	}
+}
+
+func TestDatabasePathRedactsPostgresCredentials(t *testing.T) {
+	t.Setenv("WHALE2API_DATABASE_URL", "postgres://user:secret@example.invalid:5432/pool")
+	if got := DatabasePath(); strings.Contains(got, "secret") {
+		t.Fatalf("DatabasePath leaked credentials: %q", got)
+	}
+	if got := DatabaseBackend(); got != "postgres" {
+		t.Fatalf("DatabaseBackend() = %q, want postgres", got)
 	}
 }

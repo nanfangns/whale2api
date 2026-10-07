@@ -1,0 +1,21 @@
+FROM golang:1.26 AS build
+WORKDIR /src
+ARG GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=${GOPROXY}
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -buildvcs=false -ldflags="-s -w" -o /out/whale2api-vercel ./cmd/whale2api-vercel
+
+FROM debian:bookworm-slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --no-create-home --uid 65532 whale2api
+COPY --from=build /out/whale2api-vercel /usr/local/bin/whale2api-vercel
+ENV PORT=80 \
+    WHALE2API_REQUIRE_DATABASE_URL=1 \
+    WHALE2API_CHAT_HISTORY_PATH=/tmp/chat_history.json
+EXPOSE 80
+USER 65532:65532
+ENTRYPOINT ["/usr/local/bin/whale2api-vercel"]

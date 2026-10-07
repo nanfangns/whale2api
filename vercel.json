@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "whale2api": {
+      "root": ".",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "device-harvest",
+          "format": "url",
+          "env": "DEVICE_HARVEST_URL"
+        }
+      ]
+    },
+    "device-harvest": {
+      "root": "tools/device-harvest",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": { "service": "whale2api" }
+    }
+  ]
+}

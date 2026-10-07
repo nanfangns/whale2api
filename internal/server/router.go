@@ -64,7 +64,7 @@ func NewApp() (*App, error) {
 	} else {
 		config.Logger.Warn("[device] DEVICE_HARVEST_URL not set; logins proceed without a device token")
 	}
-	config.Logger.Info("[pooldb] SQLite gateway pools enabled", "path", pooldb.DatabasePath())
+	config.Logger.Info("[pooldb] gateway pools enabled", "backend", pooldb.DatabaseBackend(), "location", pooldb.DatabasePath())
 	dsClient = dsclient.NewClient(store, resolver)
 	if err := dsClient.PreloadPow(context.Background()); err != nil {
 		config.Logger.Warn("[PoW] init failed", "error", err)

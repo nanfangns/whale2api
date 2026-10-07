@@ -9,14 +9,18 @@ import (
 	"strings"
 )
 
-//go:embed migrations/*.sql
+//go:embed migrations/*.sql migrations/postgres/*.sql
 var migrationFS embed.FS
 
-func migrate(ctx context.Context, db *sql.DB) error {
+func migrate(ctx context.Context, db *sql.DB, driver string) error {
 	if db == nil {
 		return fmt.Errorf("database is nil")
 	}
-	entries, err := migrationFS.ReadDir("migrations")
+	migrationDir := "migrations"
+	if driver == "postgres" {
+		migrationDir += "/postgres"
+	}
+	entries, err := migrationFS.ReadDir(migrationDir)
 	if err != nil {
 		return fmt.Errorf("read migrations: %w", err)
 	}
@@ -29,7 +33,7 @@ func migrate(ctx context.Context, db *sql.DB) error {
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		b, err := migrationFS.ReadFile("migrations/" + name)
+		b, err := migrationFS.ReadFile(migrationDir + "/" + name)
 		if err != nil {
 			return err
 		}

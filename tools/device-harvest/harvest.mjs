@@ -360,7 +360,7 @@ async function runServe(argv) {
       ? Math.min(MAX_CONCURRENCY, toPositiveInt(flags.concurrency, DEFAULT_CONCURRENCY))
       : envInt('HARVEST_CONCURRENCY', DEFAULT_CONCURRENCY, 1, MAX_CONCURRENCY);
   const maxQueue = envInt('HARVEST_MAX_QUEUE', DEFAULT_MAX_QUEUE, 1, 4096);
-  const sharedToken = (process.env.HARVEST_TOKEN || '').trim();
+  const sharedToken = (process.env.HARVEST_TOKEN || process.env.DEVICE_HARVEST_TOKEN || '').trim();
 
   const browser = await launchBrowser();
   const limiter = createLimiter(concurrency, maxQueue);
